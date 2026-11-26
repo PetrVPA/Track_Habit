@@ -7,6 +7,7 @@ class HabitAdmin(admin.ModelAdmin):
     list_display = ("action", "owner", "time", "is_published")
     list_filter = ("is_published", "owner")
     search_fields = ("action", "place")
+    
 
 @admin.register(HabitCompletion)
 class HabitCompletionAdmin(admin.ModelAdmin):
