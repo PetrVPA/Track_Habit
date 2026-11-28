@@ -8,7 +8,6 @@ class HabitAdmin(admin.ModelAdmin):
     list_filter = ("is_published", "owner")
     search_fields = ("action", "place")
 
-
 @admin.register(HabitCompletion)
 class HabitCompletionAdmin(admin.ModelAdmin):
     list_display = ("habit", "completed_at")
