@@ -8,13 +8,31 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    # 1. Поднимаем временную базу данных PostgreSQL для тестов
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: test_db
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+        ports:
+          - 5432:5432
+        # Ждем, пока база данных будет готова принимать подключения
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     env:
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
-      DB_NAME: ${{ secrets.NAME }}
-      DB_USER: ${{ secrets.USER }}
-      DB_PASSWORD: ${{ secrets.PASSWORD }}
-      DB_HOST: ${{ secrets.HOST }}
-
+      # 2. Используем локальные данные для тестовой БД
+      DB_NAME: test_db
+      DB_USER: test_user
+      DB_PASSWORD: test_password
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
 
     steps:
       - uses: actions/checkout@v4
@@ -28,8 +46,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libpq-dev python3-dev build-essential
-          #python -m pip install --upgrade pip
-          #apt-get install -y libpq-dev python3-dev build-essential
           pip install -r requirements.txt
 
       - name: Run tests
@@ -37,7 +53,7 @@ jobs:
           python manage.py test
 
   deploy:
-    needs: test  # Ключевой момент: деплой начнется только после успеха тестов
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to Server
