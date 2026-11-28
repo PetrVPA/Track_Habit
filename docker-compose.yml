@@ -1,0 +1,89 @@
+services:
+ # Веб-приложение Django + Gunicorn
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000
+    env_file:
+      - .env.prod
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    volumes:
+      # Только медиа-файлы (если нужны загрузки пользователей)
+      - media_data:/track_habit/media
+    restart: unless-stopped
+
+  # База данных PostgreSQL
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Redis для Celery
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+  # Воркер Celery
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    command: celery -A config worker -l info
+    env_file:
+      - .env.prod
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - media_data:/track_habit/media
+    restart: unless-stopped
+
+  # Планировщик Celery Beat
+  beat:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    command: celery -A config beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    env_file:
+      - .env.prod
+    depends_on:
+      - db
+      - redis
+    restart: unless-stopped
+
+  # Nginx — отдаёт статику и проксирует на Gunicorn
+  nginx:
+    image: nginx:stable-alpine
+    ports:
+      - "80:80"
+      - "443:443"   # если нужен HTTPS
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - static_data:/track_habit/staticfiles:ro
+      - media_data:/track_habit/media:ro
+    depends_on:
+      - web
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+  redis_data:
+  static_data:
+  media_data:
