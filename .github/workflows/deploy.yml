@@ -72,12 +72,9 @@ jobs:
           port: 22
           envs: DB_NAME,DB_USER,DB_PASSWORD,DB_HOST  # <-- Это критически важно
           script: |
-            echo "Пользователь БД: $DB_USER"
-            
-            echo "Хост БД: $DB_HOST"
-            
-            echo "DB_USER: $DB_USER"
-            
+            echo "Пользователь БД: $DB_USER"            
+            echo "Хост БД: $DB_HOST"            
+            echo "DB_USER: $DB_USER"            
             echo "DB_HOST: $DB_HOST"
             echo "DB_NAME: $DB_NAME"
             set -e
@@ -86,4 +83,4 @@ jobs:
             git pull origin main
             pip install -r requirements.txt
             python manage.py migrate --noinput
-            python manage.py collectstatic --noinput
+            nohup python manage.py collectstatic --noinput > collectstatic.log 2>&1 &
