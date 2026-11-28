@@ -61,7 +61,6 @@ jobs:
       - name: Deploy to Server
         uses: appleboy/ssh-action@v1.0.3
         env:
-          DJANGO_SECRET_KEY: ${{ secrets.SECRET_KEY }}
           DB_NAME: ${{ secrets.DB_NAME }}
           DB_USER: ${{ secrets.DB_USER }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
@@ -71,10 +70,10 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
-          script_stop: true
-          debug: true
-          envs: DB_NAME,DB_USER,DB_PASSWORD,DB_HOST
+          envs: DB_NAME,DB_USER,DB_PASSWORD,DB_HOST  # <-- Это критически важно
           script: |
+            echo "Пользователь БД: $DB_USER"
+            echo "Хост БД: $DB_HOST"
             echo "DB_USER: $DB_USER"
             echo "DB_HOST: $DB_HOST"
             echo "DB_NAME: $DB_NAME"
