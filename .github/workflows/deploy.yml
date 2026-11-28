@@ -74,6 +74,7 @@ jobs:
           script_stop: true
           debug: true
           envs: DB_NAME,DB_USER,DB_PASSWORD,DB_HOST
+          
           script: |
             echo "DB_USER: $DB_USER"
             echo "DB_HOST: $DB_HOST"
