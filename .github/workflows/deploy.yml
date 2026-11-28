@@ -70,17 +70,15 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
-          envs: DB_NAME,DB_USER,DB_PASSWORD,DB_HOST  # <-- Это критически важно
+          script_stop: true
+          debug: true
+          timeout: 2m
+          command_timeout: 10m
           script: |
-            echo "Пользователь БД: $DB_USER"            
-            echo "Хост БД: $DB_HOST"            
-            echo "DB_USER: $DB_USER"            
-            echo "DB_HOST: $DB_HOST"
-            echo "DB_NAME: $DB_NAME"
             set -e
-            cd /home/petr_vpa/track_habit
+            cd /home/***/track_habit
             source venv/bin/activate
             git pull origin main
             pip install -r requirements.txt
             python manage.py migrate --noinput
-            nohup python manage.py collectstatic --noinput > collectstatic.log 2>&1 &
+            python manage.py collectstatic --noinput
