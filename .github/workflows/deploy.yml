@@ -73,8 +73,11 @@ jobs:
           envs: DB_NAME,DB_USER,DB_PASSWORD,DB_HOST  # <-- Это критически важно
           script: |
             echo "Пользователь БД: $DB_USER"
+            
             echo "Хост БД: $DB_HOST"
+            
             echo "DB_USER: $DB_USER"
+            
             echo "DB_HOST: $DB_HOST"
             echo "DB_NAME: $DB_NAME"
             set -e
