@@ -73,8 +73,10 @@ jobs:
           port: 22
           script_stop: true
           debug: true
-          envs: DJANGO_SECRET_KEY,DB_NAME,DB_USER,DB_PASSWORD,DB_HOST
+          envs: DB_NAME,DB_USER,DB_PASSWORD,DB_HOST
           script: |
+            echo "DB_USER: $DB_USER"
+            echo "DB_HOST: $DB_HOST"
             set -e
             cd /home/petr_vpa/track_habit
             source venv/bin/activate
